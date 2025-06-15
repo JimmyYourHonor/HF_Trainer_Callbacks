@@ -27,7 +27,7 @@ class WeightAnalysisCallback(WandbCallback):
                 self.update_ratios_avg[name] = AverageMeter()
                 self.grad_ratios_avg[name] = AverageMeter()
 
-    def on_pre_optimization_step(self, args, state, control, **kwargs):
+    def on_pre_optimizer_step(self, args, state, control, **kwargs):
         self.params_before = {}
         self.grads = {}
         model = kwargs['model']
@@ -36,7 +36,7 @@ class WeightAnalysisCallback(WandbCallback):
                 self.params_before[name] = param.detach().cpu()
                 self.grads[name] = param.grad.detach().cpu() if param.grad is not None else None
 
-    def on_post_optimization_step(self, args, state, control, **kwargs):
+    def on_optimizer_step(self, args, state, control, **kwargs):
         self.params_after = {}
         model = kwargs['model']
         for name, param in model.named_parameters():
@@ -51,13 +51,13 @@ class WeightAnalysisCallback(WandbCallback):
                 grad = self.grads[name]
                 if grad is not None and grad.norm() > 0:
                     update_ratio = (update.norm() / self.params_before[name].norm()).log10().data.item()
-                    grad_ratio = nn.functional.cosine_similarity(grad, update, dim=-1).data.item()
+                    grad_ratio = nn.functional.cosine_similarity(grad.flatten(), update.flatten(), dim=0).data.item()
                     self.update_ratios_avg[name].update(update_ratio, weight=1)
                     self.grad_ratios_avg[name].update(grad_ratio, weight=1)
             # Store the smoothness of updates
             if name in self.previous_update:
                 prev_update = self.previous_update[name]
-                angle = torch.acos(torch.dot(update, prev_update)) / \
+                angle = torch.acos(torch.dot(update.flatten(), prev_update.flatten())) / \
                 (torch.linalg.norm(update) * torch.linalg.norm(prev_update))
                 if len(self.update_smoothness) == 1:
                     self.update_smoothness[0][name] = angle
