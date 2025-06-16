@@ -65,7 +65,7 @@ class WeightAnalysisCallback(WandbCallback):
                     acc_angle = self.update_smoothness[-2][name] + angle
                     self.update_smoothness[-1][name] = acc_angle
                     self._wandb.log({
-                        f'update_smoothness_{name}' : acc_angle
+                        f'update_smoothness/{name}' : acc_angle
                     })
             self.previous_update[name] = update
 
@@ -76,6 +76,6 @@ class WeightAnalysisCallback(WandbCallback):
             self.grad_ratios_avgs[-1][name] = self.grad_ratios_avg[name].average()
             self.update_ratios_avgs[-1][name] = self.update_ratios_avg[name].average()
             self._wandb.log({
-                f'update_ratios_{name}': self.grad_ratios_avg[name].average(),
-                f'grad_ratios_{name}': self.update_ratios_avg[name].average(),
+                f'update_ratios/{name}': self.grad_ratios_avg[name].average(),
+                f'grad_ratios/{name}': self.update_ratios_avg[name].average(),
             })
