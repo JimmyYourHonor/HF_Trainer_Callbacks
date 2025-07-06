@@ -76,6 +76,6 @@ class WeightAnalysisCallback(WandbCallback):
             self.grad_ratios_avgs[-1][name] = self.grad_ratios_avg[name].average()
             self.update_ratios_avgs[-1][name] = self.update_ratios_avg[name].average()
             self._wandb.log({
-                f'update_ratios/{name}': self.grad_ratios_avg[name].average(),
-                f'grad_ratios/{name}': self.update_ratios_avg[name].average(),
+                f'update_ratios/{name}': self.update_ratios_avg[name].average(),
+                f'grad_ratios/{name}': self.grad_ratios_avg[name].average(),
             })
