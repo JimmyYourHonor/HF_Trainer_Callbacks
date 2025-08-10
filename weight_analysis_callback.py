@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from transformers.integrations import WandbCallback
-import wandb
 from .utils import AverageMeter
 
 
