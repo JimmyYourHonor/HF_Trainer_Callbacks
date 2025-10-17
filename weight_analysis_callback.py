@@ -56,8 +56,16 @@ class WeightAnalysisCallback(WandbCallback):
             # Store the smoothness of updates
             if name in self.previous_update:
                 prev_update = self.previous_update[name]
-                angle = torch.acos(torch.dot(update.flatten(), prev_update.flatten())) / \
-                (torch.linalg.norm(update) * torch.linalg.norm(prev_update))
+                u = update.flatten()
+                v = prev_update.flatten()
+                u_norm = u.norm()
+                v_norm = v.norm()
+                if u_norm == 0 or v_norm == 0:
+                    angle = torch.tensor(0.0)
+                else:
+                    cos = torch.dot(u, v) / (u_norm * v_norm)
+                    cos = cos.clamp(-1.0, 1.0)
+                    angle = torch.acos(cos)
                 if len(self.update_smoothness) == 1:
                     self.update_smoothness[0][name] = angle
                 else:
